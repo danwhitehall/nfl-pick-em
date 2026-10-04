@@ -1,5 +1,6 @@
 import os
 
+import streamlit as st
 from dotenv import load_dotenv
 from supabase import create_client
 
@@ -10,17 +11,39 @@ from supabase import create_client
 
 load_dotenv()
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+def get_secret(name):
+    """
+    Get a secret from Streamlit secrets when deployed,
+    falling back to the local .env file when running locally.
+    """
+
+    value = os.getenv(name)
+
+    if value:
+        return value
+
+    try:
+        return st.secrets[name]
+    except (KeyError, FileNotFoundError):
+        return None
+
+
+SUPABASE_URL = get_secret("SUPABASE_URL")
+SUPABASE_KEY = get_secret("SUPABASE_KEY")
+
 
 if not SUPABASE_URL:
     raise ValueError(
-        "SUPABASE_URL is missing from your .env file"
+        "SUPABASE_URL is missing. "
+        "Add it to your local .env file or Streamlit Cloud secrets."
     )
+
 
 if not SUPABASE_KEY:
     raise ValueError(
-        "SUPABASE_KEY is missing from your .env file"
+        "SUPABASE_KEY is missing. "
+        "Add it to your local .env file or Streamlit Cloud secrets."
     )
 
 

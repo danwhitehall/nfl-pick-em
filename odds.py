@@ -1,15 +1,37 @@
 import os
 
 import requests
+import streamlit as st
 from dotenv import load_dotenv
 
 
 load_dotenv()
 
-API_KEY = os.getenv("ODDS_API_KEY")
+
+def get_secret(name):
+    """
+    Get a secret from Streamlit secrets when deployed,
+    falling back to the local .env file when running locally.
+    """
+
+    value = os.getenv(name)
+
+    if value:
+        return value
+
+    try:
+        return st.secrets[name]
+    except (KeyError, FileNotFoundError):
+        return None
+
+
+API_KEY = get_secret("ODDS_API_KEY")
 
 if not API_KEY:
-    raise ValueError("ODDS_API_KEY is missing from your .env file")
+    raise ValueError(
+        "ODDS_API_KEY is missing. "
+        "Add it to your local .env file or Streamlit Cloud secrets."
+    )
 
 
 URL = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds"
