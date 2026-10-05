@@ -3,7 +3,7 @@ import streamlit as st
 from database import (
     initialise_database,
     get_games,
-    get_pick,
+    get_picks,
 )
 
 from settings import (
@@ -66,6 +66,10 @@ games = get_games(
     selected_week,
 )
 
+picks = get_picks(
+    tuple(game["game_id"] for game in games)
+)
+
 
 if not games:
 
@@ -94,9 +98,7 @@ results = []
 
 for game in games:
 
-    pick = get_pick(
-        game["game_id"]
-    )
+    pick = picks.get(game["game_id"])
 
     # -----------------------------------------------------
     # GAME NOT PART OF PICK 'EM

@@ -1,8 +1,10 @@
 import nflreadpy as nfl
+import streamlit as st
 
 from odds import get_odds_games
 
 
+@st.cache_data(ttl=600)
 def get_schedule(season):
     """
     Get the NFL schedule for a given season.
@@ -98,18 +100,21 @@ def clean_score(score):
     return int(score)
 
 
-def get_week_games(season, week):
+def get_week_games(season, week, refresh=False):
     """
     Get the schedule for a week and combine it
     with win probabilities from The Odds API.
     """
+
+    if refresh:
+        get_schedule.clear()
 
     schedule = get_week_schedule(
         season,
         week,
     )
 
-    odds_games = get_odds_games()
+    odds_games = get_odds_games(refresh=refresh)
 
     games = []
 
@@ -169,13 +174,16 @@ def get_week_games(season, week):
     return games
 
 
-def get_past_week_games(season, week):
+def get_past_week_games(season, week, refresh=False):
     """
     Get a historical week's games.
 
     Historical games do not request bookmaker odds,
     but their final scores are retained.
     """
+
+    if refresh:
+        get_schedule.clear()
 
     schedule = get_week_schedule(
         season,

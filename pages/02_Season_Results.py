@@ -2,8 +2,8 @@ import streamlit as st
 
 from database import (
     initialise_database,
-    get_games,
-    get_pick,
+    get_season_games,
+    get_picks,
 )
 
 from settings import (
@@ -59,6 +59,25 @@ total_tied = 0
 
 weekly_results = []
 
+season_games = get_season_games(
+    SEASON,
+    CURRENT_WEEK,
+)
+
+games_by_week = {}
+
+for game in season_games:
+
+    games_by_week.setdefault(
+        game["week"],
+        [],
+    ).append(game)
+
+
+season_picks = get_picks(
+    tuple(game["game_id"] for game in season_games)
+)
+
 
 # ---------------------------------------------------------
 # LOOP THROUGH WEEKS
@@ -69,10 +88,7 @@ for week in range(
     CURRENT_WEEK + 1,
 ):
 
-    games = get_games(
-        SEASON,
-        week,
-    )
+    games = games_by_week.get(week, [])
 
     dan_wins = 0
     fran_wins = 0
@@ -86,9 +102,7 @@ for week in range(
 
     for game in games:
 
-        pick = get_pick(
-            game["game_id"]
-        )
+        pick = season_picks.get(game["game_id"])
 
         # -------------------------------------------------
         # NO PICK 'EM ENTRY

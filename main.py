@@ -4,8 +4,8 @@ from database import (
     initialise_database,
     save_games,
     get_games,
+    get_picks,
     save_pick,
-    get_pick,
 )
 
 from nfl_data import (
@@ -106,6 +106,7 @@ if update_data:
             games = get_week_games(
                 SEASON,
                 CURRENT_WEEK,
+                refresh=True,
             )
 
             save_games(games)
@@ -186,6 +187,7 @@ if manage_past_games:
             past_games = get_past_week_games(
                 SEASON,
                 historical_week,
+                refresh=True,
             )
 
             save_games(past_games)
@@ -202,6 +204,10 @@ if manage_past_games:
     past_games = get_games(
         SEASON,
         historical_week,
+    )
+
+    past_picks = get_picks(
+        tuple(game["game_id"] for game in past_games)
     )
 
     if not past_games:
@@ -221,9 +227,7 @@ if manage_past_games:
 
         for game in past_games:
 
-            if get_pick(
-                game["game_id"]
-            ) is not None:
+            if game["game_id"] in past_picks:
 
                 played_count += 1
 
@@ -264,9 +268,7 @@ if manage_past_games:
 
             game_id = game["game_id"]
 
-            existing_pick = get_pick(
-                game_id
-            )
+            existing_pick = past_picks.get(game_id)
 
             winner = game.get("winner")
 
@@ -681,6 +683,10 @@ games = get_games(
     CURRENT_WEEK,
 )
 
+current_picks = get_picks(
+    tuple(game["game_id"] for game in games)
+)
+
 
 if not games:
 
@@ -703,9 +709,7 @@ completed_picks = 0
 
 for game in games:
 
-    if get_pick(
-        game["game_id"]
-    ) is not None:
+    if game["game_id"] in current_picks:
 
         completed_picks += 1
 
@@ -763,9 +767,7 @@ for game_number, game in enumerate(
     # EXISTING PICK
     # -----------------------------------------------------
 
-    existing_pick = get_pick(
-        game_id
-    )
+    existing_pick = current_picks.get(game_id)
 
     # -----------------------------------------------------
     # GAME HEADER

@@ -74,6 +74,7 @@ TEAM_NAME_TO_ABBR = {
 }
 
 
+@st.cache_data(ttl=300)
 def get_nfl_odds():
     """
     Get current NFL moneyline odds from The Odds API.
@@ -158,11 +159,14 @@ def calculate_probabilities(game):
     return consensus
 
 
-def get_odds_games():
+def get_odds_games(refresh=False):
     """
     Get NFL games from The Odds API and convert them
     into a simple dictionary keyed by away/home team.
     """
+
+    if refresh:
+        get_nfl_odds.clear()
 
     games = get_nfl_odds()
 
